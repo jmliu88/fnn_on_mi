@@ -31,19 +31,21 @@ def tcplink(sock, addr):
             st = time.time()
             tmpmfc = '/tmp/%s.mfc.tmp'%id_generator()
             wav_file = os.path.join(file_dir,data.strip())
-            os.system('HCopy -c %s %s %s'%('wav_confi',wav_file,tmpmfc))
+            os.system('HCopy -C %s %s %s'%('wav_confi',wav_file,tmpmfc))
             x,m = feature_operation.read_htk(tmpmfc)
             print 'read feature'
             val_predictions ,final_prediction = mdl.predict(x,m)
-            print val_predictions
-            sock.send((' %s' % final_prediction.decode('utf-8')).encode('utf-8'))
+            print final_predictions
+            #sock.send(('%s'% final_prediction.decode('utf-8')).encode('utf-8'))
+            sock.send(('%s'% final_prediction))#.decode('utf-8')).encode('utf-8'))
             print '%ds passed'%time.time()-st
             os.system('rm %s'%tmpmfc)
     except BaseException,e:
-        raise(e)
+        pass
     finally:
         sock.close()
         print('Connection from %s:%s closed.' % addr)
+
 
 file_dir = '/home/james/audio'
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -58,8 +60,12 @@ if len(sys.argv) == 2:
 	mdl.load(sys.argv[1])
 #get_output = 1
 print('Model loaded. Waiting for connection...')
-
-while True:
-    sock, addr = s.accept()
-    p = Process(target=tcplink, args=(sock, addr))
-    p.start()
+try:
+    while True:
+        sock, addr = s.accept()
+        p = Process(target=tcplink, args=(sock, addr))
+        p.start()
+except BaseException,e:
+    pass
+finally:
+    s.close()
