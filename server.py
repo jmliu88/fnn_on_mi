@@ -52,7 +52,7 @@ s.listen(5)
 print 'Socket is built.'
 
 #nn,get_output = model.build_nn(sys.argv[1])
-mdl = model.Model()
+mdl = model.Model(feature_operation.label_index)
 mdl.compile()
 if len(sys.argv) == 2:
 	mdl.load(sys.argv[1])
