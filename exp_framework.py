@@ -177,7 +177,7 @@ if __name__ == '__main__':
             print("Epoch {} validation cost = {}".format(epoch, cost_val))
             print("Epoch {} correctly predicted {} out of {}".format(epoch, hit,len(Y_test)))
             print(time.strftime('%X %x %Z'))
-            mdl.save('models_test/trained_{}_{}_{}_{}.npz'.format(epoch,cost_train,cost_val,acc))
+            mdl.save('models_8class/trained_{}_{}_{}_{}.npz'.format(epoch,cost_train,cost_val,acc))
             costTrainArray.append(cost_train)
             costValArray.append(cost_val)
             hitTestArray.append(hit)
