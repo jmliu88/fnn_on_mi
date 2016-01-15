@@ -59,10 +59,10 @@ def read_htk(f,length = 5000):
     fid = htkmfc.open(f.strip())
     mfc = fid.getall()
     if mfc.shape[0] < length:
-        return np.concatenate((mfc,np.zeros([length-mfc.shape[0],mfc.shape[1]])),axis = 0), np.concatenate((np.ones([mfc.shape[0],]),np.zeros([length-mfc.shape[0],])),axis = 0)
+        return np.expand_dims(np.concatenate((mfc,np.zeros([length-mfc.shape[0],mfc.shape[1]])),axis = 0),axis = 0),np.expand_dims( np.concatenate((np.ones([mfc.shape[0],]),np.zeros([length-mfc.shape[0],])),axis = 0),axis = 0)
 
     else:
-        return (mfc[:length,:],np.ones([length,]))
+        return np.expand_dims(mfc[:length,:],axis=0),np.expand_dims(np.ones([length,]),axis=0)
 
 def name_to_label(filename):
     for i,l in enumerate( label_index):
@@ -85,13 +85,13 @@ def read_htk_list(f_list):
             print iFile
             raise(e)
         if 'X' not in locals():
-            X = np.expand_dims(x,axis=0)
+            X = x#np.expand_dims(x,axis=0)
             Y = y
-            mask = np.expand_dims(m,axis=0)
+            mask = m#np.expand_dims(m,axis=0)
         else:
-            X = np.concatenate((X,np.expand_dims(x,axis=0)),axis=0).astype('float32')
+            X = np.concatenate((X,x),axis=0).astype('float32')
             Y = np.concatenate((Y,y),axis=0).astype('int32')
-            mask = np.concatenate((mask,np.expand_dims(m,axis=0)),axis=0).astype('float32')
+            mask = np.concatenate((mask,m),axis=0).astype('float32')
     return (X,Y,mask)
 def format_htktxt_to_h5():
     ## depreciated
