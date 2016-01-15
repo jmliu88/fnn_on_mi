@@ -50,7 +50,8 @@ print 'Socket is built.'
 #nn,get_output = model.build_nn(sys.argv[1])
 mdl = model.Model()
 mdl.compile()
-mdl.load(sys.argv[1])
+if len(sys.argv) == 2:
+	mdl.load(sys.argv[1])
 #get_output = 1
 print('Model loaded. Waiting for connection...')
 
