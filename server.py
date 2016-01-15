@@ -1,5 +1,7 @@
 import socket
+import pdb
 import sys
+import pdb
 import time
 from multiprocessing import Process
 import os
@@ -35,13 +37,14 @@ def tcplink(sock, addr):
             x,m = feature_operation.read_htk(tmpmfc)
             print 'read feature'
             val_predictions ,final_prediction = mdl.predict(x,m)
-            print final_predictions
-            #sock.send(('%s'% final_prediction.decode('utf-8')).encode('utf-8'))
-            sock.send(('%s'% final_prediction))#.decode('utf-8')).encode('utf-8'))
-            print '%ds passed'%time.time()-st
+            #pdb.set_trace()
+            sock.send(('%s'% final_prediction[0].decode('utf-8')).encode('utf-8'))
+#            sock.send(('DO NOT REPLY'))
+            #sock.send(('%d'%val_predictions[0]))#.decode('utf-8')).encode('utf-8'))
+            print '%ds passed'%(time.time()-st)
             os.system('rm %s'%tmpmfc)
     except BaseException,e:
-        pass
+            print e
     finally:
         sock.close()
         print('Connection from %s:%s closed.' % addr)
@@ -56,9 +59,9 @@ print 'Socket is built.'
 #nn,get_output = model.build_nn(sys.argv[1])
 mdl = model.Model(feature_operation.label_index)
 mdl.compile()
+print mdl.label_index
 if len(sys.argv) == 2:
 	mdl.load(sys.argv[1])
-#get_output = 1
 print('Model loaded. Waiting for connection...')
 try:
     while True:

@@ -22,7 +22,7 @@ def tcplink(sock,addr):
           sock.send(('%s' % 'FN'))#final_prediction.decode('utf-8')).encode('utf-8'))
 #    return 1
     except BaseException,e:
-        raise(e)
+        pass
     finally:
         sock.close()
 
