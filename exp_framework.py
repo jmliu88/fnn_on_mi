@@ -128,7 +128,7 @@ if __name__ == '__main__':
     random.shuffle(index)
 
     ## split into train val test
-    trainPortion,valPortion = [int(i*N_SEQ) for i in [0.9,0.95]]
+    trainPortion,valPortion = [int(i*N_SEQ) for i in [0.95,0.98]]
 
     list_train = dataList[index[:trainPortion]]
     save_list(list_train,'exp/train.list')
@@ -153,7 +153,8 @@ if __name__ == '__main__':
     p = ProgressBar()
 
     try:
-        EPOCH_SIZE = len(list_train)/N_BATCH
+        #EPOCH_SIZE = len(list_train)/N_BATCH
+        EPOCH_SIZE = 1#len(list_train)/N_BATCH
         for epoch in range(NUM_EPOCHS):
             data = data_generator_from_htk(list_train,isShuffle=True)
             cost_train = 0
