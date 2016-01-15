@@ -1,6 +1,7 @@
 #!/bin/bash
-models=~/experiments/models
+models=$1
 while [ 1 -eq 1 ]; do 
 	scp -rq $models james@115.159.58.218:~/models
-	sleep 100
+    
+	sleep 1000
 done

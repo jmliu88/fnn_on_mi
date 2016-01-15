@@ -92,7 +92,7 @@ class Model():
         return self.l_out,self.get_output
     def predict(self,x,m):
         decision_value = self.get_output(x,m)
-        print(decision_value)
+        #print(decision_value)
         val_predictions = np.argmax(decision_value, axis=1)
         final_predictions = [self.label_index[t] for t in val_predictions]
         return val_predictions,final_predictions

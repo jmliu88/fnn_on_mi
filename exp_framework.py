@@ -134,10 +134,10 @@ if __name__ == '__main__':
     save_list(list_train,'exp/train.list')
     list_val = dataList[index[trainPortion:valPortion]]
     save_list(list_val,'exp/val.list')
-    X_val,Y_val,mask_val = read_htk_list(list_val)
+#    X_val,Y_val,mask_val = read_htk_list(list_val)
     list_test = dataList[index[valPortion:]]
     save_list(list_test,'exp/test.list')
-    X_test,Y_test,mask_test = read_htk_list(list_test)
+#    X_test,Y_test,mask_test = read_htk_list(list_test)
     ## init model
     import model
     mdl = model.Model(label_index)
@@ -153,10 +153,12 @@ if __name__ == '__main__':
     p = ProgressBar()
 
     try:
-        #EPOCH_SIZE = len(list_train)/N_BATCH
-        EPOCH_SIZE = 1#len(list_train)/N_BATCH
+        EPOCH_SIZE = len(list_train)/N_BATCH
+        #EPOCH_SIZE = 1#len(list_train)/N_BATCH
         for epoch in range(NUM_EPOCHS):
             data = data_generator_from_htk(list_train,isShuffle=True)
+            data_val = data_generator_from_htk(list_val,isShuffle=True)
+            data_test = data_generator_from_htk(list_test,isShuffle=True)
             cost_train = 0
             p.start()
             for _ in range(EPOCH_SIZE):
@@ -168,15 +170,21 @@ if __name__ == '__main__':
                 p.update(int(float(_)/EPOCH_SIZE*100))
             #    print("{} minibatch cost = {}".format(_,cost_batch))
             p.finish()
-            cost_val = mdl.compute_cost(X_val, Y_val, mask_val)
             cost_train = cost_train/EPOCH_SIZE
-            val_predictions,final_predicitons = mdl.predict(X_test,mask_test)
-            hit = np.sum(val_predictions == Y_test)
-            acc = hit/float(len(Y_test))
+            cost_val = 0
+            for val_epoch in range(len(list_val)/N_BATCH):
+                x_v,y_v,m_v = data_val.get_batch()
+                cost_val = cost_val + mdl.compute_cost(x_v,y_v,m_v)/N_BATCH
+            hit = 0
+            for test_epoch in range(len(list_test)/N_BATCH):
+                x_t,y_t,m_t = data_test.get_batch()
+                pred = mdl.predict(x_t,m_t)[0]
+                hit = hit + np.sum(pred==y_t)
+            acc = hit/float(len(list_test))
 
             print("Epoch {} train cost = {}".format(epoch, cost_train))
             print("Epoch {} validation cost = {}".format(epoch, cost_val))
-            print("Epoch {} correctly predicted {} out of {}".format(epoch, hit,len(Y_test)))
+            print("Epoch {} correctly predicted {} out of {}".format(epoch, hit,len(list_test)))
             print(time.strftime('%X %x %Z'))
             mdl.save('models_8class/trained_{}_{}_{}_{}.npz'.format(epoch,cost_train,cost_val,acc))
             costTrainArray.append(cost_train)
