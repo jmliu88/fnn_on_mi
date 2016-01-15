@@ -48,7 +48,7 @@ class Model():
         self.label_index = label_index
         pass
     def compile(self):
-        N_LSTM = 10
+        N_LSTM = 256
         N_DENSE = 10
         # First, we build the network, starting with an input layer
         # Recurrent layers expect input of shape
@@ -94,12 +94,14 @@ class Model():
         decision_value = self.get_output(x,m)
         print(decision_value)
         val_predictions = np.argmax(decision_value, axis=1)
-        final_prediction = [self.label_index[t] for t in val_predictions]
-        return final_prediction
+        final_predictions = [self.label_index[t] for t in val_predictions]
+        return val_predictions,final_predictions
     def update(self,X_batch,Y_batch,m_batch):
         self.train(X_batch,Y_batch,m_batch)
     def compute_cost(self,X_batch,Y_batch,m_batch):
         self.compute_cost(X_batch,Y_batch,m_batch)
+    def save(self,savename):
+        np.savez(savename, *lasagne.layers.get_all_param_values(self.l_out))
 
 
 # In[4]:
