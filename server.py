@@ -19,6 +19,7 @@ def tcplink(sock, addr):
         #theano.sandbox.cuda.use('cpu')
         ext = '.wav'
         print('Accept new connection from %s:%s...' % addr)
+        print('Local time %s'%time.strftime("%H:%M:%S"))
         while True:
             data = sock.recv(1024)
             data = data.strip()
@@ -33,6 +34,7 @@ def tcplink(sock, addr):
             st = time.time()
             tmpmfc = '/tmp/%s.mfc.tmp'%id_generator()
             wav_file = os.path.join(file_dir,data.strip())
+            print wav_file
             os.system('HCopy -C %s %s %s'%('wav_confi',wav_file,tmpmfc))
             x,m = feature_operation.read_htk(tmpmfc)
             print 'read feature'
@@ -51,6 +53,7 @@ def tcplink(sock, addr):
 
 
 file_dir = '/home/james/audio'
+#file_dir = '/home/james/data/wav'
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind(('',9527))
 s.listen(5)
@@ -69,6 +72,6 @@ try:
         p = Process(target=tcplink, args=(sock, addr))
         p.start()
 except BaseException,e:
-    pass
+    print(e)
 finally:
     s.close()
