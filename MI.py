@@ -1,7 +1,5 @@
-
 # coding: utf-8
-
-# In[2]:
+import pdb
 
 import numpy as np
 from scipy import io
@@ -16,9 +14,6 @@ import theano
 import theano.tensor as T
 from sklearn.cross_validation import KFold
 import os
-
-
-# In[3]:
 
 ## define a batch genetator which could be iterated
 import random
@@ -63,7 +58,19 @@ class batch_generator():
 #directory = 'data/mat/fox_100x100_matlab.mat'
 directory = sys.argv[1]#'data/mat/fox_100x100_matlab.mat'
 D = io.loadmat(directory)
-features = D['features'].todense()
+features0 = D['features'].todense()
+## remove identical features
+uniid = []
+for i in range(features0.shape[1]):
+    if len(np.unique(np.array(features0[:,i]))) == 1:
+        uniid.append(i)
+features = np.delete(features0,uniid,axis = 1)
+## standardize all data (maybe flawed)
+all_mean,all_std = utils.standardize(features)
+features = (features - all_mean)/all_std
+
+#features = features0
+#pdb.set_trace()
 labels = np.array(D['labels'].todense())[0]
 bag_ids = D['bag_ids'][0]
 
@@ -90,8 +97,8 @@ import csv
 
 ### train val test sets
 HIDDEN_SIZE = 100
-DROPOUT_RATIO = 0.2
-expDir = os.path.join('layer_2_hidden_%d_dropout_%f_adam'%(HIDDEN_SIZE,DROPOUT_RATIO),os.path.basename(directory)+os.path.sep)
+DROPOUT_RATIO = 0
+expDir = os.path.join('hidden_%d_dropout_%.1f_rmsprop_stand_all_feat'%(HIDDEN_SIZE,DROPOUT_RATIO),os.path.basename(directory)+os.path.sep)
 if not os.path.isdir(expDir):
     os.makedirs(expDir)
 learning_rate = 0.001
@@ -122,15 +129,12 @@ for r in range(10):
                 layer,
                 W=lasagne.init.Normal(1./np.sqrt(layer.output_shape[-1])),
                 name='Attention')
-        layer = lasagne.layers.DenseLayer(
-            layer, HIDDEN_SIZE, W=lasagne.init.HeNormal(), name='Out dense 1',
-            nonlinearity=lasagne.nonlinearities.leaky_rectify)
-        layer = lasagne.layers.DropoutLayer(layer, p=DROPOUT_RATIO)
-        # two layers fnn
-        layer = lasagne.layers.DenseLayer(
-            layer, HIDDEN_SIZE, W=lasagne.init.HeNormal(), name='Out dense 2',
-            nonlinearity=lasagne.nonlinearities.leaky_rectify)
-        layer = lasagne.layers.DropoutLayer(layer, p=DROPOUT_RATIO)
+        N_LAYERS = 1
+        for _ in range(N_LAYERS):
+            layer = lasagne.layers.DenseLayer(
+                layer, HIDDEN_SIZE, W=lasagne.init.HeNormal(), name='Out dense 1',
+                nonlinearity=lasagne.nonlinearities.leaky_rectify)
+            layer = lasagne.layers.DropoutLayer(layer, p=DROPOUT_RATIO)
         # Add final dense layer, whose bias is initialized to the target mean
         layer = lasagne.layers.DenseLayer(
             layer, 1, W=lasagne.init.HeNormal(), name='Out dense 3',
@@ -172,6 +176,14 @@ for r in range(10):
             y_train, y_val = y_train_all[train_ind], y_train_all[val_ind]
             m_train, m_val = m_train_all[train_ind], m_train_all[val_ind]
             break
+        ## standardize three sets
+#        x_tr_mean,x_tr_std = utils.standardize(X_train)
+#
+#        X_train = (X_train-x_tr_mean)/x_tr_std
+#        X_val = (X_val-x_tr_mean)/x_tr_std
+#        X_test = (X_test-x_tr_mean)/x_tr_std
+#        print X_train
+#        pdb.set_trace()
 
         MAX_EPOCH = 500
         NO_BEST = 5
@@ -304,7 +316,7 @@ if 0:
             # Retrieve all network parameters
             all_params = lasagne.layers.get_all_params(layers['out'])
             # Compute updates
-            updates = lasagne.updates.adam(cost, all_params, learning_rate)
+            updates = lasagne.updates.rmsprop(cost, all_params, learning_rate)
             # Compile training function
             train = theano.function([layers['in'].input_var, target],
                                     cost, updates=updates)
