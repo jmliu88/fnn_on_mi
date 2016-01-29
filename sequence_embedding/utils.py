@@ -238,22 +238,29 @@ class AttentionLayer(lasagne.layers.Layer):
     ----------
     incoming : a :class:`Layer` instance or a tuple
         The layer feeding into this layer, or the expected input shape
+    
+    num_units : int
+        Number of hidden units in the layer.
 
     W : Theano shared variable, numpy array or callable
         An initializer for the weights of the layer. If a shared variable or a
-        numpy array is provided the shape should  be (num_inputs,).
+        numpy array is provided the shape should be (num_inputs, num_units).
 
     b : Theano shared variable, numpy array, callable or None
         An initializer for the biases of the layer. If a shared variable or a
-        numpy array is provided the shape should be () (it is a scalar).
+        numpy array is provided the shape should be (num_units,).
         If None is provided the layer will have no biases.
+    
+    b : Theano shared variable, numpy array, callable or None
+        An initializer for the aggregation vector. If a shared variable or a
+        numpy array is provided the shape should be (num_units,).
 
     nonlinearity : callable or None
         The nonlinearity that is applied to the layer activations. If None
         is provided, the layer will be linear.
     '''
-    def __init__(self, incoming, W=lasagne.init.Normal(),
-                 b=lasagne.init.Constant(0.),
+    def __init__(self, incoming, num_units, W=lasagne.init.Normal(),
+                 b=lasagne.init.Constant(0.), v=lasagne.init.Normal(),
                  nonlinearity=lasagne.nonlinearities.tanh,
                  **kwargs):
         super(AttentionLayer, self).__init__(incoming, **kwargs)
@@ -261,13 +268,17 @@ class AttentionLayer(lasagne.layers.Layer):
         self.nonlinearity = (lasagne.nonlinearities.identity
                              if nonlinearity is None else nonlinearity)
 
-        # Add weight vector parameter
-        self.W = self.add_param(W, (self.input_shape[2],), name="W")
+        # Add weight matrix parameter
+        self.W = self.add_param(
+            W, (self.input_shape[2], num_units), name="W")
         if b is None:
             self.b = None
         else:
             # Add bias scalar parameter
-            self.b = self.add_param(b, (), name="b", regularizable=False)
+            self.b = self.add_param(
+                b, (num_units,), name="b", regularizable=False)
+        # Add aggregation vector parameter
+        self.v = self.add_param(v, (num_units,), name="v")
 
     def get_output_shape_for(self, input_shape):
         return (input_shape[0], input_shape[-1])
@@ -280,6 +291,8 @@ class AttentionLayer(lasagne.layers.Layer):
             activation = activation + self.b
         # Apply nonlinearity
         activation = self.nonlinearity(activation)
+        # Aggregate vectors
+        activation = T.dot(activation, self.v)
         # Perform softmax
         activation = T.exp(activation)
         activation /= activation.sum(axis=1).dimshuffle(0, 'x')
