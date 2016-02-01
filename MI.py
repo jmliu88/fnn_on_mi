@@ -163,7 +163,7 @@ for C in [100,50,20,10]:
             # Retrieve all network parameters
             all_params = lasagne.layers.get_all_params(layers['out'])
             # Compute updates
-            updates = lasagne.updates.adam(cost, all_params, learning_rate)
+            updates = lasagne.updates.rmsprop(cost, all_params, learning_rate)
             # Compile training function
             train = theano.function([layers['in'].input_var, target],
                                     cost, updates=updates)

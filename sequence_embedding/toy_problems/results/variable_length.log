@@ -1,0 +1,39 @@
+####### Learning rate: 0.01, aggregation: attention, task: add
+Batches trained: 1000, cost: 4.33250627909, accuracy: 0.153
+Batches trained: 2000, cost: 4.18704864252, accuracy: 0.154
+Batches trained: 3000, cost: 4.00766725931, accuracy: 0.186
+Batches trained: 4000, cost: 2.58743293271, accuracy: 0.301
+Batches trained: 5000, cost: 1.39939808222, accuracy: 0.354
+Batches trained: 6000, cost: 1.74502791985, accuracy: 0.291
+Batches trained: 7000, cost: 1.72017889561, accuracy: 0.167
+Batches trained: 8000, cost: 2.33210318804, accuracy: 0.259
+Batches trained: 9000, cost: 1.52140182217, accuracy: 0.345
+Batches trained: 10000, cost: 1.31149111646, accuracy: 0.306
+Batches trained: 11000, cost: 1.58897308593, accuracy: 0.255
+Batches trained: 12000, cost: 1.65813653622, accuracy: 0.204
+Batches trained: 13000, cost: 1.64023189347, accuracy: 0.352
+Batches trained: 14000, cost: 1.14428717592, accuracy: 0.419
+Batches trained: 15000, cost: 1.32230947966, accuracy: 0.387
+Batches trained: 16000, cost: 1.09258451121, accuracy: 0.376
+Batches trained: 17000, cost: 1.95192859307, accuracy: 0.172
+Batches trained: 18000, cost: 3.38011624711, accuracy: 0.189
+Batches trained: 19000, cost: 3.25656819625, accuracy: 0.211
+Batches trained: 20000, cost: 3.10117825506, accuracy: 0.201
+Batches trained: 21000, cost: 2.82858180994, accuracy: 0.225
+Batches trained: 22000, cost: 3.35350758764, accuracy: 0.227
+Batches trained: 23000, cost: 2.80034901924, accuracy: 0.226
+Batches trained: 24000, cost: 3.94524103775, accuracy: 0.197
+Batches trained: 25000, cost: 3.04989182283, accuracy: 0.202
+Batches trained: 26000, cost: 2.63907927374, accuracy: 0.262
+Batches trained: 27000, cost: 2.56691647868, accuracy: 0.237
+Batches trained: 28000, cost: 2.258686189, accuracy: 0.037
+Batches trained: 29000, cost: 3.05928609191, accuracy: 0.225
+Batches trained: 30000, cost: 5.95134567763, accuracy: 0.223
+Batches trained: 31000, cost: 2.84133501627, accuracy: 0.187
+Batches trained: 32000, cost: 2.42663514147, accuracy: 0.24
+Batches trained: 33000, cost: 2.30275188799, accuracy: 0.245
+Batches trained: 34000, cost: 2.84977593448, accuracy: 0.067
+Batches trained: 35000, cost: 2.68415810274, accuracy: 0.261
+####### Learning rate: 0.01, aggregation: attention, task: add
+####### Learning rate: 0.01, aggregation: attention, task: add
+####### Learning rate: 0.01, aggregation: attention, task: add
