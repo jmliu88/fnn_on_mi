@@ -1,2 +1,6 @@
 #!/bin/sh
-python -u MI.py $1 | tee  `basename $1`.log
+for i in `find data/mat -name '*.mat'`; do
+
+    echo $i
+    OMP_NUM_THREADS=1 python -u MI.py $i | tee  `basename $i`.log &
+done
