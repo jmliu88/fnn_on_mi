@@ -7,6 +7,8 @@ from scipy import io
 
 import sys
 sys.path.append('./sequence_embedding/')
+from toy_problems.variable_length_experiments import MeanLayer
+#pdb.set_trace()
 import utils
 
 import lasagne
@@ -98,12 +100,13 @@ import csv
 ### train val test set
 HIDDEN_SIZE = 100
 DROPOUT_RATIO = 0
-C = 50 # Factor of l1 norm
+C = 50 # Factor of l2 norm
 learning_rate = 0.001
 ATTENTION_HIDDEN = 10
 R = 3
-for C in [0,0.0001,0.1,0.01,0.001,1]:
-    expDir = os.path.join('hidden_%d_rmsprop_stand_all_feat_%.4f_l1norm_%d_attention'%(HIDDEN_SIZE,C,ATTENTION_HIDDEN),os.path.basename(directory)+os.path.sep)
+for C in [0]:#[100,0.0001,0.1,0.01,0.001,10]:
+    #expDir = os.path.join('hidden_%d_dropout_%.1f_rmsprop_stand_all_feat_%.2f_l2norm_%.2flr_%d_attention'%(HIDDEN_SIZE,DROPOUT_RATIO,C,learning_rate,ATTENTION_HIDDEN),os.path.basename(directory)+os.path.sep)
+    expDir = os.path.join('mean',os.path.basename(directory)+os.path.sep)
     if not os.path.isdir(expDir):
         os.makedirs(expDir)
         with open(os.path.join(expDir,'README'),'w') as fid:
@@ -133,10 +136,9 @@ for C in [0,0.0001,0.1,0.01,0.001,1]:
             # Add the layer to aggregate over time steps
                 # We must force He initialization because Lasagne doesn't like
                 # 1-dim shapes in He and Glorot initializers
-            layer = utils.AttentionLayer(
-                    layer,ATTENTION_HIDDEN,
-                    W=lasagne.init.Normal(1./np.sqrt(layer.output_shape[-1])),
-                    name='Attention')
+            layer = MeanLayer(
+                    layer,
+                    name='Mean')
             N_LAYERS = 1
             for _ in range(N_LAYERS):
                 layer = lasagne.layers.DenseLayer(
@@ -151,8 +153,8 @@ for C in [0,0.0001,0.1,0.01,0.001,1]:
                 layer, (-1,))
             # Keep track of the final layer
             layers['out'] = layer
-            #l1_norm = regularize_layer_params(layer,l1)
-            l1_norm = regularize_layer_params(lasagne.layers.get_all_layers(layers['out']),l1)
+            #l2_norm = regularize_layer_params(layer,l2)
+            l2_norm = regularize_layer_params(lasagne.layers.get_all_layers(layers['out']),l2)
 
             # Symbolic variable for target values
             target = T.vector('target')
@@ -160,7 +162,7 @@ for C in [0,0.0001,0.1,0.01,0.001,1]:
             network_output = lasagne.layers.get_output(layers['out'])
             # Create a symbolic function for the network cost
             cost = T.mean(lasagne.objectives.binary_crossentropy(network_output,target))
-            cost = cost + C*l1_norm
+            cost = cost + C*l2_norm
             #cost = T.mean((network_output - target)**2)
             # Retrieve all network parameters
             all_params = lasagne.layers.get_all_params(layers['out'])

@@ -1,4 +1,3 @@
-import lstm_problems
 import pdb
 import lasagne
 import theano
@@ -46,6 +45,7 @@ class MeanLayer(lasagne.layers.Layer):
 
 if __name__ == '__main__':
 
+    import lstm_problems
     if not os.path.exists(RESULTS_PATH):
         os.makedirs(RESULTS_PATH)
 
