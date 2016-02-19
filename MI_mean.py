@@ -72,6 +72,11 @@ features = np.delete(features0,uniid,axis = 1)
 all_mean,all_std = utils.standardize(features)
 features = (features - all_mean)/all_std
 
+from sklearn.decomposition import PCA
+pca = PCA()
+features =pca.fit_transform(features)
+
+
 #features = features0
 #pdb.set_trace()
 labels = np.array(D['labels'].todense())[0]
@@ -106,7 +111,7 @@ ATTENTION_HIDDEN = 10
 R = 3
 for C in [0]:#[100,0.0001,0.1,0.01,0.001,10]:
     #expDir = os.path.join('hidden_%d_dropout_%.1f_rmsprop_stand_all_feat_%.2f_l2norm_%.2flr_%d_attention'%(HIDDEN_SIZE,DROPOUT_RATIO,C,learning_rate,ATTENTION_HIDDEN),os.path.basename(directory)+os.path.sep)
-    expDir = os.path.join('mean',os.path.basename(directory)+os.path.sep)
+    expDir = os.path.join('PCA_mean',os.path.basename(directory)+os.path.sep)
     if not os.path.isdir(expDir):
         os.makedirs(expDir)
         with open(os.path.join(expDir,'README'),'w') as fid:

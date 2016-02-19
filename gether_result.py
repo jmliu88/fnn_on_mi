@@ -14,7 +14,7 @@ with open('results.txt','r') as fid:
     dataset = [x.split('_')[0] for x in dataset]
     mods = list(set(mod))
 
-    pdb.set_trace()
+    #pdb.set_trace()
     data = [list(set(dataset))[i] for i in [3,0,4,2,1]]
     acc =np.empty(shape=(len(mods),len(data)))
     acc.fill(np.nan)

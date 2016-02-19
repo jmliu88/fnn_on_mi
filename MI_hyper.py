@@ -64,6 +64,9 @@ class batch_generator():
 #    ATTENTION_HIDDEN = 10
 #    HIDDEN_SIZE = 100
 #    N_LAYERS = 1
+
+def main_test(POWER, INPUT_NOISE, C, REG, ATTENTION_HIDDEN, HIDDEN_SIZE, N_LAYERS):
+    return random.randint()
 def main(POWER, INPUT_NOISE, C, REG, ATTENTION_HIDDEN, HIDDEN_SIZE, N_LAYERS):
     directory = sys.argv[1]#'data/mat/fox_100x100_matlab.mat'
     D = io.loadmat(directory)
@@ -129,7 +132,7 @@ def main(POWER, INPUT_NOISE, C, REG, ATTENTION_HIDDEN, HIDDEN_SIZE, N_LAYERS):
             fid.write('learning rate = %f\n'%learning_rate)
             fid.write('dropout ratio = %f\n'%learning_rate)
             fid.write('penalty factor = %f\n'%C)
-    result = np.zeros(shape=(3,10))
+    result = np.zeros(shape=(R,10))
     for r in range(R):
         k=0
         kf = KFold(X.shape[0],10,True)
@@ -306,13 +309,44 @@ def main(POWER, INPUT_NOISE, C, REG, ATTENTION_HIDDEN, HIDDEN_SIZE, N_LAYERS):
     with open(os.path.join( expDir, 'result_%f_%f.csv'%(np.mean(result[:]),np.std(result[:])) ),'w') as fid:
         writer = csv.writer(fid)
         writer.writerows(result)
+    return -np.mean(result[:])
 
+if __name__ == '__main__':
 
-
-
-# In[72]:
-
-#get_ipython().system(u'cat fox_100x100_matlab.mat/result10.420000.csv')
-
+    import simple_spearmint
+    parameter_space = {'POWER'      : {'type': 'float', 'min': 0.7, 'max': 1},
+                    'INPUT_NOISE': {'type': 'float', 'min': 0.01, 'max': 1},
+                    'C'          : {'type': 'float', 'min': 0.0001, 'max': 1},
+                    'REG'        : {'type': 'enum', 'options': [l1, l2]},
+                    'ATTENTION_HIDDEN': {'type': 'int', 'min':1, 'max': 50},
+                    'HIDDEN_SIZE': {'type': 'int', 'min':10, 'max':200},
+                    'N_LAYERS': {'type': 'int', 'min':1, 'max':8}}
+    ss = simple_spearmint.SimpleSpearmint(parameter_space)
+    for n in xrange(5):
+        # Get random parameter settings
+        suggestion = ss.suggest_random()
+        # Retrieve an objective value for these parameters
+        value = main(suggestion['POWER'], # How much of the variance that PCA should explain.
+                        suggestion['INPUT_NOISE'], # input noise after PCA
+                        suggestion['C'], # penalty factor
+                        suggestion['REG'], # l1norm or l2norm
+                        suggestion['ATTENTION_HIDDEN'], # how many hidden units in the attention layer
+                        suggestion['HIDDEN_SIZE'], # hidden size for the classifier fully connected layers
+                        suggestion['N_LAYERS'])# number of layers for the classifier fully connected layers
+        print "Random trial {}: {} -> {}".format(n + 1, suggestion, value)
+        # Update the optimizer on the result
+        ss.update(suggestion, value)
+    for n in xrange(100):
+        # Get a suggestion from the optimizer
+        suggestion = ss.suggest()
+        # Get an objective value; the ** syntax is equivalent to
+        # the call to objective above
+        value = main(**suggestion)
+        print "GP trial {}: {} -> {}".format(n + 1, suggestion, value)
+        # Update the optimizer on the result
+        ss.update(suggestion, value)
+    best_parameters, best_objective = ss.get_best_parameters()
+    print "Best parameters {} for objective {}".format(
+        best_parameters, best_objective)
 
 
