@@ -67,7 +67,7 @@ class batch_generator():
 
 def main_test(POWER, INPUT_NOISE, C, REG, ATTENTION_HIDDEN, HIDDEN_SIZE, N_LAYERS):
     return random.randint()
-def main(POWER, INPUT_NOISE, C, REG, ATTENTION_HIDDEN, HIDDEN_SIZE, N_LAYERS):
+def main(POWER=1, INPUT_NOISE=False, C=0, REG=l1, ATTENTION_HIDDEN=10, HIDDEN_SIZE=100, N_LAYERS=3):
     directory = sys.argv[1]#'data/mat/fox_100x100_matlab.mat'
     D = io.loadmat(directory)
     features0 = D['features'].todense()
@@ -125,7 +125,11 @@ def main(POWER, INPUT_NOISE, C, REG, ATTENTION_HIDDEN, HIDDEN_SIZE, N_LAYERS):
     R = 3
     s = '%s'%REG
     s = s.split()[1] ## s is the name of regularization
-    expDir = os.path.join('exp_spearmint/',os.path.basename(directory),'PCA%.1f_innoise_%f_%snorm_%f_attention_%d_hidden_%d_layers_%d'%(POWER, INPUT_NOISE,  s, C, ATTENTION_HIDDEN, HIDDEN_SIZE, N_LAYERS)+os.path.sep)
+    if os.path.isdir(sys.argv[2]):
+        saveDir = sys.argv[2]
+    else:
+        saveDir = 'exp_spearmint/'
+    expDir = os.path.join(saveDir,os.path.basename(directory),'PCA%.1f_innoise_%f_%snorm_%f_attention_%d_hidden_%d_layers_%d'%(POWER, INPUT_NOISE,  s, C, ATTENTION_HIDDEN, HIDDEN_SIZE, N_LAYERS)+os.path.sep)
     if not os.path.isdir(expDir):
         os.makedirs(expDir)
         with open(os.path.join(expDir,'README'),'w') as fid:
@@ -156,10 +160,15 @@ def main(POWER, INPUT_NOISE, C, REG, ATTENTION_HIDDEN, HIDDEN_SIZE, N_LAYERS):
             # Add the layer to aggregate over time steps
                 # We must force He initialization because Lasagne doesn't like
                 # 1-dim shapes in He and Glorot initializers
-            layer = utils.AttentionLayer(
+            layer1 = utils.AttentionLayer(
                     layer,ATTENTION_HIDDEN,
                     W=lasagne.init.Normal(1./np.sqrt(layer.output_shape[-1])),
                     name='Attention')
+            layer2 = utils.AttentionLayer(
+                    layer,ATTENTION_HIDDEN,
+                    W=lasagne.init.Normal(1./np.sqrt(layer.output_shape[-1])),
+                    name='Attention')
+            layer = lasagne.layers.MergeLayer([layer1,layer2])
             for _ in range(N_LAYERS):
                 layer = lasagne.layers.DenseLayer(
                     layer, HIDDEN_SIZE, W=lasagne.init.HeNormal(), name='Out dense 1',
@@ -311,8 +320,7 @@ def main(POWER, INPUT_NOISE, C, REG, ATTENTION_HIDDEN, HIDDEN_SIZE, N_LAYERS):
         writer.writerows(result)
     return -np.mean(result[:])
 
-if __name__ == '__main__':
-
+def main_hyper():
     import simple_spearmint
     parameter_space = {'POWER'      : {'type': 'float', 'min': 0.7, 'max': 1},
                     'INPUT_NOISE': {'type': 'float', 'min': 0.01, 'max': 1},
@@ -348,5 +356,6 @@ if __name__ == '__main__':
     best_parameters, best_objective = ss.get_best_parameters()
     print "Best parameters {} for objective {}".format(
         best_parameters, best_objective)
-
-
+if __name__ == '__main__':
+    main()
+    #main_hyper()
