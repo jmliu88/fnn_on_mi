@@ -11,7 +11,8 @@ target = T.ivector('target')
 
 layers = {'input_x':lasagne.layers.InputLayer((None,N_FEAT_X))}
 layers['input_u']=lasagne.layers.InputLayer((None,N_FEAT_U))
-layers['a']=lasagne.layers.DenseLayer(layers['input_u'],num_units = 1, nonlinearity=lasagne.nonlinearities.sigmoid, W = lasagne.init.Constant(1.), b= lasagne.init.Constant(0.))
+layers['v']=lasagne.layers.DenseLayer(layers['input_u'],num_units = 1, nonlinearity=lasagne.nonlinearities.linear, W = lasagne.init.Constant(1.), b= lasagne.init.Constant(0.))
+layers['a']=lasagne.layers.NonlinearityLayer(layers['v'], nonlinearity=lasagne.nonlinearities.sigmoid)
 #layers['a']=lasagne.layers.DenseLayer(layers['input_u'],num_units = 1, nonlinearity=lasagne.nonlinearities.linear, W = lasagne.init.Constant(1.), b= lasagne.init.Constant(0.))
 weights = T.tile(lasagne.layers.get_output(layers['a'], u ), (1, N_FEAT_X))
 x_hat = weights * x
